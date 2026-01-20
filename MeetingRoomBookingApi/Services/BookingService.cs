@@ -50,14 +50,27 @@ namespace MeetingRoomBookingApi.Services
 
 
             // Tarkista päällekkäisyydet
-            var hasOverlap = await _context.Bookings
-                .AnyAsync(b => b.MeetingRoomId == dto.MeetingRoomId &&
+            var conflictingBooking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.MeetingRoomId == dto.MeetingRoomId &&
                              ((dto.StartTime >= b.StartTime && dto.StartTime < b.EndTime) ||
                               (dto.EndTime > b.StartTime && dto.EndTime <= b.EndTime) ||
                               (dto.StartTime <= b.StartTime && dto.EndTime >= b.EndTime)));
 
-            if (hasOverlap)
-                throw new BookingConflictException("Huone on jo varattu kyseiselle ajanjaksolle.");
+            if (conflictingBooking != null)
+            {
+                throw new BookingConflictException(
+                    "Huone on jo varattu kyseiselle ajanjaksolle.",
+                    new
+                    {
+                        conflictingBooking = new
+                        {
+                            startTime = conflictingBooking.StartTime,
+                            endTime = conflictingBooking.EndTime,
+                            bookedBy = conflictingBooking.BookedBy
+                        }
+                    }
+                );
+            }
 
 
             // Luo varaus
