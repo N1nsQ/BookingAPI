@@ -17,6 +17,8 @@ namespace MeetingRoomBookingApi.Controllers
             _context = context;
         }
 
+        private const int MinBookingMinutes = 15;
+
         // POST: api/Bookings
         [HttpPost]
         public async Task<ActionResult<BookingDto>> CreateBooking(CreateBookingDto dto)
@@ -31,6 +33,19 @@ namespace MeetingRoomBookingApi.Controllers
             if (dto.StartTime < DateTime.Now)
             {
                 return BadRequest("Varaus ei voi sijoittua menneisyyteen.");
+            }
+
+            // Validoi: Varauksen minimipituus
+            var duration = dto.EndTime - dto.StartTime;
+            if (duration.TotalMinutes < MinBookingMinutes)
+            {
+                return BadRequest(new
+                {
+                    error = "BookingTooShort",
+                    message = $"Varauksen minimipituus on {MinBookingMinutes} minuuttia.",
+                    currentDuration = $"{duration.TotalMinutes} minuuttia",
+                    minimumDuration = $"{MinBookingMinutes} minuuttia"
+                });
             }
 
             // Tarkista että huone on olemassa
