@@ -9,6 +9,7 @@ namespace MeetingRoomBookingApi.Services
     public class BookingService : IBookingService
     {
         private readonly ApplicationDbContext _context;
+        private readonly DateTime now = DateTime.UtcNow;
         private const int MinBookingMinutes = 15;
 
         public BookingService(ApplicationDbContext context)
@@ -23,7 +24,7 @@ namespace MeetingRoomBookingApi.Services
                 throw new BookingValidationException("Aloitusajan on oltava ennen lopetusaikaa");
 
             // Validoi: Varaukset eivät voi sijoittua menneisyyteen
-            if (dto.StartTime < DateTime.Now)
+            if (dto.StartTime < now)
                 throw new BookingValidationException("Varaus ei voi sijoittua menneisyyteen.");
 
 
