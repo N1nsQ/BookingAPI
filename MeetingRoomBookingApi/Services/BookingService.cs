@@ -34,7 +34,17 @@ namespace MeetingRoomBookingApi.Services
 
             // Validoi: Varauksen minimipituus
             if (bookingDuration.TotalMinutes < MinBookingMinutes)
-                throw new BookingValidationException($"Yritit tehdä {bookingDuration.TotalMinutes} minuutin varauksen. Varauksen minimipituus on {MinBookingMinutes} minuuttia.");
+                throw new BookingValidationException(
+                    $"Varauksen minimipituus on {MinBookingMinutes} minuuttia.",
+                    new
+                    {
+                        duration = new
+                        {
+                            errorMessage = "Booking too short",
+                            currentDuration = bookingDuration.TotalMinutes,
+                            minimumDuration = MinBookingMinutes
+                        }
+                    });
 
             // Validoi: Varauksen maximipituus
             if (bookingDuration.TotalHours > MaxBookingHours)
