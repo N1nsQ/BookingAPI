@@ -12,6 +12,7 @@ namespace MeetingRoomBookingApi.Services
         private readonly DateTime now = DateTime.UtcNow;
         private const int MinBookingMinutes = 15;
         private const int MaxBookingHours = 16;
+        private const int MaxBookingMonthsAhead = 6;
 
         public BookingService(ApplicationDbContext context)
         {
@@ -38,6 +39,11 @@ namespace MeetingRoomBookingApi.Services
             // Validoi: Varauksen maximipituus
             if (bookingDuration.TotalHours > MaxBookingHours)
                 throw new BookingValidationException($"Yritit tehdä yli {MaxBookingHours} tunnin varauksen. Varauksen maximipituus on {MaxBookingHours} tuntia.");
+
+            // Validoi: Varaus max 6kk päähän nykyhetkestä
+            var maxBookingDate = now.AddMonths(MaxBookingMonthsAhead);
+            if (dto.StartTime > maxBookingDate)
+                throw new BookingValidationException($"Voit tehdä varauksen enintään {MaxBookingMonthsAhead} kuukauden päähän nykyhetkestä.");
 
             // Tarkista että huone on olemassa
             var room = await _context.MeetingRooms.FindAsync(dto.MeetingRoomId) ?? throw new NotFoundException($"Kokoushuonetta ID:llä {dto.MeetingRoomId} ei löydy.");
