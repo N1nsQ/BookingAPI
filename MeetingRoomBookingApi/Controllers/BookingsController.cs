@@ -157,7 +157,7 @@ namespace MeetingRoomBookingApi.Controllers
             var booking = await _context.Bookings.FindAsync(id);
             if (booking == null)
             {
-                return NotFound();
+                return NotFound($"Varausta ID:llä {id} ei löydy.");
             }
 
             _context.Bookings.Remove(booking);
