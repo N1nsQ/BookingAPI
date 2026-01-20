@@ -3,6 +3,7 @@ using MeetingRoomBookingApi.Data;
 using MeetingRoomBookingApi.Services;
 using MeetingRoomBookingApi.Middleware;
 using MeetingRoomBookingApi.Models;
+using MeetingRoomBookingApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Rekisteröi services
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<ISystemTime, SystemTime>();
 
 // Lisää Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
