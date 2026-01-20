@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MeetingRoomBookingApi.Data;
 using MeetingRoomBookingApi.Services;
+using MeetingRoomBookingApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,8 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     context.Database.EnsureCreated();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

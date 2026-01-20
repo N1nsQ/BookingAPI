@@ -1,5 +1,6 @@
 ﻿using MeetingRoomBookingApi.Data;
 using MeetingRoomBookingApi.DTOs;
+using MeetingRoomBookingApi.Exceptions;
 using MeetingRoomBookingApi.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,21 +20,21 @@ namespace MeetingRoomBookingApi.Services
         {
             // Validoi: Aloitusajan täytyy olla ennen lopetusaikaa
             if (dto.StartTime >= dto.EndTime)
-                throw new Exception("Aloitusaika ennen lopetusaikaa");
+                throw new BookingValidationException("Aloitusajan on oltava ennen lopetusaikaa");
 
             // Validoi: Varaukset eivät voi sijoittua menneisyyteen
             if (dto.StartTime < DateTime.Now)
-                throw new Exception("Varaus ei voi sijoittua menneisyyteen.");
+                throw new BookingValidationException("Varaus ei voi sijoittua menneisyyteen.");
 
 
             // Validoi: Varauksen minimipituus
             var duration = dto.EndTime - dto.StartTime;
             if (duration.TotalMinutes < MinBookingMinutes)
-                throw new Exception($"Varauksen minimipituus on {MinBookingMinutes} minuuttia.");
+                throw new BookingValidationException($"Yritit tehdä {duration.TotalMinutes} minuutin varauksen. Varauksen minimipituus on {MinBookingMinutes} minuuttia.");
 
 
             // Tarkista että huone on olemassa
-            var room = await _context.MeetingRooms.FindAsync(dto.MeetingRoomId) ?? throw new Exception($"Kokoushuonetta ID:llä {dto.MeetingRoomId} ei löydy.");
+            var room = await _context.MeetingRooms.FindAsync(dto.MeetingRoomId) ?? throw new BookingNotFoundException($"Kokoushuonetta ID:llä {dto.MeetingRoomId} ei löydy.");
 
 
             // Tarkista päällekkäisyydet
@@ -44,7 +45,7 @@ namespace MeetingRoomBookingApi.Services
                               (dto.StartTime <= b.StartTime && dto.EndTime >= b.EndTime)));
 
             if (hasOverlap)
-                throw new Exception("Huone on jo varattu kyseiselle ajanjaksolle.");
+                throw new BookingConflictException("Huone on jo varattu kyseiselle ajanjaksolle.");
 
 
             // Luo varaus
@@ -78,7 +79,7 @@ namespace MeetingRoomBookingApi.Services
         {
             var booking = await _context.Bookings
                 .Include(b => b.MeetingRoom)
-                .FirstOrDefaultAsync(b => b.Id == id) ?? throw new Exception("Varausta ei löytynyt.");
+                .FirstOrDefaultAsync(b => b.Id == id) ?? throw new BookingNotFoundException($"Varausta ID:llä {id} ei löytynyt.");
 
             var dto = new BookingDto
             {
@@ -96,7 +97,7 @@ namespace MeetingRoomBookingApi.Services
 
         public async Task<IEnumerable<BookingDto>> GetRoomBookingsAsync(int roomId)
         {
-            var room = await _context.MeetingRooms.FindAsync(roomId) ?? throw new Exception($"Kokoushuonetta ID:llä {roomId} ei löydy.");
+            var room = await _context.MeetingRooms.FindAsync(roomId) ?? throw new BookingNotFoundException($"Kokoushuonetta ID:llä {roomId} ei löydy.");
 
             var bookings = await _context.Bookings
                 .Include(b => b.MeetingRoom)
@@ -139,7 +140,7 @@ namespace MeetingRoomBookingApi.Services
 
         public async Task DeleteBookingAsync(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id) ?? throw new Exception($"Varausta ID:llä {id} ei löydy.");
+            var booking = await _context.Bookings.FindAsync(id) ?? throw new BookingNotFoundException($"Varausta ID:llä {id} ei löydy.");
             _context.Bookings.Remove(booking);
 
             await _context.SaveChangesAsync();
