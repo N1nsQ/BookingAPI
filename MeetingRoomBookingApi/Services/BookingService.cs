@@ -66,10 +66,9 @@ namespace MeetingRoomBookingApi.Services
 
             // Tarkista päällekkäisyydet
             var conflictingBooking = await _context.Bookings
-                .FirstOrDefaultAsync(b => b.MeetingRoomId == dto.MeetingRoomId &&
-                             ((dto.StartTime >= b.StartTime && dto.StartTime < b.EndTime) ||
-                              (dto.EndTime > b.StartTime && dto.EndTime <= b.EndTime) ||
-                              (dto.StartTime <= b.StartTime && dto.EndTime >= b.EndTime)));
+                .FirstOrDefaultAsync(b => b.MeetingRoomId == dto.MeetingRoomId && 
+                dto.StartTime < b.EndTime && 
+                dto.EndTime > b.StartTime);
 
             if (conflictingBooking != null)
             {
