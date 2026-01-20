@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MeetingRoomBookingApi.Data;
+using MeetingRoomBookingApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ builder.Services.AddControllers();
 // Lisää Entity Framework Core InMemory database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseInMemoryDatabase("MeetingRoomDb"));
+
+// Rekisteröi services
+builder.Services.AddScoped<IBookingService, BookingService>();
 
 // Lisää Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
