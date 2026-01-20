@@ -48,7 +48,17 @@ namespace MeetingRoomBookingApi.Services
 
             // Validoi: Varauksen maximipituus
             if (bookingDuration.TotalHours > MaxBookingHours)
-                throw new BookingValidationException($"Yritit tehdä yli {MaxBookingHours} tunnin varauksen. Varauksen maximipituus on {MaxBookingHours} tuntia.");
+                throw new BookingValidationException(
+                    $"Varauksen maximipituus on {MaxBookingHours} tuntia.",
+                    new
+                    {
+                        durationMax = new
+                        {
+                            errorMessage = "Booking too long",
+                            currentDuration = bookingDuration,
+                            maxHours = MaxBookingHours
+                        }
+                    });
 
             // Validoi: Varaus max 6kk päähän nykyhetkestä
             var maxBookingDate = now.AddMonths(MaxBookingMonthsAhead);
