@@ -9,7 +9,6 @@ namespace MeetingRoomBookingApi.Services
     public class BookingService : IBookingService
     {
         private readonly ApplicationDbContext _context;
-        private readonly DateTime now = DateTime.UtcNow;
         private const int MinBookingMinutes = 15;
         private const int MaxBookingHours = 16;
         private const int MaxBookingMonthsAhead = 6;
@@ -28,7 +27,7 @@ namespace MeetingRoomBookingApi.Services
                 throw new BookingValidationException("Aloitusajan on oltava ennen lopetusaikaa");
 
             // Validoi: Varaukset eivät voi sijoittua menneisyyteen
-            if (dto.StartTime < now)
+            if (dto.StartTime < DateTime.UtcNow)
                 throw new BookingValidationException("Varaus ei voi sijoittua menneisyyteen.");
 
 
@@ -61,7 +60,7 @@ namespace MeetingRoomBookingApi.Services
                     });
 
             // Validoi: Varaus max 6kk päähän nykyhetkestä
-            var maxBookingDate = now.AddMonths(MaxBookingMonthsAhead);
+            var maxBookingDate = DateTime.UtcNow.AddMonths(MaxBookingMonthsAhead);
             if (dto.StartTime > maxBookingDate)
                 throw new BookingValidationException($"Voit tehdä varauksen enintään {MaxBookingMonthsAhead} kuukauden päähän nykyhetkestä.");
 
