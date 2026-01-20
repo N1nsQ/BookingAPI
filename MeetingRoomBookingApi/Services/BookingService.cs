@@ -11,6 +11,7 @@ namespace MeetingRoomBookingApi.Services
         private readonly ApplicationDbContext _context;
         private readonly DateTime now = DateTime.UtcNow;
         private const int MinBookingMinutes = 15;
+        private const int MaxBookingHours = 16;
 
         public BookingService(ApplicationDbContext context)
         {
@@ -19,6 +20,8 @@ namespace MeetingRoomBookingApi.Services
 
         public async Task<BookingDto> CreateBookingAsync(CreateBookingDto dto)
         {
+            var bookingDuration = dto.EndTime - dto.StartTime;
+
             // Validoi: Aloitusajan täytyy olla ennen lopetusaikaa
             if (dto.StartTime >= dto.EndTime)
                 throw new BookingValidationException("Aloitusajan on oltava ennen lopetusaikaa");
@@ -29,10 +32,12 @@ namespace MeetingRoomBookingApi.Services
 
 
             // Validoi: Varauksen minimipituus
-            var duration = dto.EndTime - dto.StartTime;
-            if (duration.TotalMinutes < MinBookingMinutes)
-                throw new BookingValidationException($"Yritit tehdä {duration.TotalMinutes} minuutin varauksen. Varauksen minimipituus on {MinBookingMinutes} minuuttia.");
+            if (bookingDuration.TotalMinutes < MinBookingMinutes)
+                throw new BookingValidationException($"Yritit tehdä {bookingDuration.TotalMinutes} minuutin varauksen. Varauksen minimipituus on {MinBookingMinutes} minuuttia.");
 
+            // Validoi: Varauksen maximipituus
+            if (bookingDuration.TotalHours > MaxBookingHours)
+                throw new BookingValidationException($"Yritit tehdä yli {MaxBookingHours} tunnin varauksen. Varauksen maximipituus on {MaxBookingHours} tuntia.");
 
             // Tarkista että huone on olemassa
             var room = await _context.MeetingRooms.FindAsync(dto.MeetingRoomId) ?? throw new NotFoundException($"Kokoushuonetta ID:llä {dto.MeetingRoomId} ei löydy.");
