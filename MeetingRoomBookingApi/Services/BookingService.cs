@@ -37,12 +37,9 @@ namespace MeetingRoomBookingApi.Services
                     $"Varauksen minimipituus on {_settings.MinBookingMinutes} minuuttia.",
                     new
                     {
-                        duration = new
-                        {
-                            errorMessage = "Booking too short",
-                            currentDuration = bookingDuration.TotalMinutes,
-                            minimumDuration = _settings.MinBookingMinutes
-                        }
+                        errorMessage = "Booking too short",
+                        currentDuration = bookingDuration.TotalMinutes,
+                        minimumDuration = _settings.MinBookingMinutes  
                     });
 
             // Validoi: Varauksen maximipituus
@@ -51,12 +48,9 @@ namespace MeetingRoomBookingApi.Services
                     $"Varauksen maximipituus on {_settings.MaxBookingHours} tuntia.",
                     new
                     {
-                        durationMax = new
-                        {
-                            errorMessage = "Booking too long",
-                            currentDuration = bookingDuration,
-                            maxHours = _settings.MaxBookingHours
-                        }
+                        errorMessage = "Booking too long",
+                        currentDurationFormatted = $"{(int)bookingDuration.TotalDays} days, {bookingDuration.Hours} hours, {bookingDuration.Minutes} minutes",
+                        maxHours = _settings.MaxBookingHours  
                     });
 
             // Validoi: Varaus max 6kk päähän nykyhetkestä
@@ -81,16 +75,12 @@ namespace MeetingRoomBookingApi.Services
                     "Huone on jo varattu kyseiselle ajanjaksolle.",
                     new
                     {
-                        conflictingBooking = new
-                        {
-                            startTime = conflictingBooking.StartTime,
-                            endTime = conflictingBooking.EndTime,
-                            bookedBy = conflictingBooking.BookedBy
-                        }
+                        startTime = conflictingBooking.StartTime,
+                        endTime = conflictingBooking.EndTime,
+                        bookedBy = conflictingBooking.BookedBy
                     }
                 );
             }
-
 
             // Luo varaus
             var booking = new Booking
@@ -190,7 +180,6 @@ namespace MeetingRoomBookingApi.Services
             await _context.SaveChangesAsync();
 
         }
-
 
     }
 
