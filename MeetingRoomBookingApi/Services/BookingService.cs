@@ -34,7 +34,7 @@ namespace MeetingRoomBookingApi.Services
 
 
             // Tarkista että huone on olemassa
-            var room = await _context.MeetingRooms.FindAsync(dto.MeetingRoomId) ?? throw new BookingNotFoundException($"Kokoushuonetta ID:llä {dto.MeetingRoomId} ei löydy.");
+            var room = await _context.MeetingRooms.FindAsync(dto.MeetingRoomId) ?? throw new NotFoundException($"Kokoushuonetta ID:llä {dto.MeetingRoomId} ei löydy.");
 
 
             // Tarkista päällekkäisyydet
@@ -79,7 +79,7 @@ namespace MeetingRoomBookingApi.Services
         {
             var booking = await _context.Bookings
                 .Include(b => b.MeetingRoom)
-                .FirstOrDefaultAsync(b => b.Id == id) ?? throw new BookingNotFoundException($"Varausta ID:llä {id} ei löytynyt.");
+                .FirstOrDefaultAsync(b => b.Id == id) ?? throw new NotFoundException($"Varausta ID:llä {id} ei löytynyt.");
 
             var dto = new BookingDto
             {
@@ -97,7 +97,7 @@ namespace MeetingRoomBookingApi.Services
 
         public async Task<IEnumerable<BookingDto>> GetRoomBookingsAsync(int roomId)
         {
-            var room = await _context.MeetingRooms.FindAsync(roomId) ?? throw new BookingNotFoundException($"Kokoushuonetta ID:llä {roomId} ei löydy.");
+            var room = await _context.MeetingRooms.FindAsync(roomId) ?? throw new NotFoundException($"Kokoushuonetta ID:llä {roomId} ei löydy.");
 
             var bookings = await _context.Bookings
                 .Include(b => b.MeetingRoom)
@@ -140,7 +140,7 @@ namespace MeetingRoomBookingApi.Services
 
         public async Task DeleteBookingAsync(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id) ?? throw new BookingNotFoundException($"Varausta ID:llä {id} ei löydy.");
+            var booking = await _context.Bookings.FindAsync(id) ?? throw new NotFoundException($"Varausta ID:llä {id} ei löydy.");
             _context.Bookings.Remove(booking);
 
             await _context.SaveChangesAsync();
