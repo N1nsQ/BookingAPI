@@ -134,9 +134,8 @@ namespace MeetingRoomBookingApi.Services
             var room = await _context.MeetingRooms.FindAsync(roomId) ?? throw new NotFoundException($"Kokoushuonetta ID:llä {roomId} ei löydy.");
 
             var bookings = await _context.Bookings
-                .Include(b => b.MeetingRoom)
+                
                 .Where(b => b.MeetingRoomId == roomId)
-                .OrderBy(b => b.StartTime)
                 .Select(b => new BookingDto
                 {
                     Id = b.Id,
@@ -147,6 +146,7 @@ namespace MeetingRoomBookingApi.Services
                     EndTime = b.EndTime,
                     Description = b.Description
                 })
+                .OrderBy(b => b.StartTime)
                 .ToListAsync();
 
             return bookings;
@@ -155,8 +155,6 @@ namespace MeetingRoomBookingApi.Services
         public async Task<IEnumerable<BookingDto>> GetAllBookingsAsync()
         {
             var bookings = await _context.Bookings
-                .Include(b => b.MeetingRoom)
-                .OrderBy(b => b.StartTime)
                 .Select(b => new BookingDto
                 {
                     Id = b.Id,
@@ -167,6 +165,7 @@ namespace MeetingRoomBookingApi.Services
                     EndTime = b.EndTime,
                     Description = b.Description
                 })
+                .OrderBy(b => b.StartTime)
                 .ToListAsync();
 
             return bookings;
