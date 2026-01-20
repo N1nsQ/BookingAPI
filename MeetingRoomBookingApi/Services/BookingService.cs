@@ -3,19 +3,19 @@ using MeetingRoomBookingApi.DTOs;
 using MeetingRoomBookingApi.Exceptions;
 using MeetingRoomBookingApi.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace MeetingRoomBookingApi.Services
 {
     public class BookingService : IBookingService
     {
         private readonly ApplicationDbContext _context;
-        private const int MinBookingMinutes = 15;
-        private const int MaxBookingHours = 16;
-        private const int MaxBookingMonthsAhead = 6;
+        private readonly BookingSettings _settings;
 
-        public BookingService(ApplicationDbContext context)
+        public BookingService(ApplicationDbContext context, IOptions<BookingSettings> settings)
         {
             _context = context;
+            _settings = settings.Value;
         }
 
         public async Task<BookingDto> CreateBookingAsync(CreateBookingDto dto)
@@ -32,37 +32,37 @@ namespace MeetingRoomBookingApi.Services
 
 
             // Validoi: Varauksen minimipituus
-            if (bookingDuration.TotalMinutes < MinBookingMinutes)
+            if (bookingDuration.TotalMinutes < _settings.MinBookingMinutes)
                 throw new BookingValidationException(
-                    $"Varauksen minimipituus on {MinBookingMinutes} minuuttia.",
+                    $"Varauksen minimipituus on {_settings.MinBookingMinutes} minuuttia.",
                     new
                     {
                         duration = new
                         {
                             errorMessage = "Booking too short",
                             currentDuration = bookingDuration.TotalMinutes,
-                            minimumDuration = MinBookingMinutes
+                            minimumDuration = _settings.MinBookingMinutes
                         }
                     });
 
             // Validoi: Varauksen maximipituus
-            if (bookingDuration.TotalHours > MaxBookingHours)
+            if (bookingDuration.TotalHours > _settings.MaxBookingHours)
                 throw new BookingValidationException(
-                    $"Varauksen maximipituus on {MaxBookingHours} tuntia.",
+                    $"Varauksen maximipituus on {_settings.MaxBookingHours} tuntia.",
                     new
                     {
                         durationMax = new
                         {
                             errorMessage = "Booking too long",
                             currentDuration = bookingDuration,
-                            maxHours = MaxBookingHours
+                            maxHours = _settings.MaxBookingHours
                         }
                     });
 
             // Validoi: Varaus max 6kk päähän nykyhetkestä
-            var maxBookingDate = DateTime.UtcNow.AddMonths(MaxBookingMonthsAhead);
+            var maxBookingDate = DateTime.UtcNow.AddMonths(_settings.MaxBookingMonthsAhead);
             if (dto.StartTime > maxBookingDate)
-                throw new BookingValidationException($"Voit tehdä varauksen enintään {MaxBookingMonthsAhead} kuukauden päähän nykyhetkestä.");
+                throw new BookingValidationException($"Voit tehdä varauksen enintään {_settings.MaxBookingMonthsAhead} kuukauden päähän nykyhetkestä.");
 
             // Tarkista että huone on olemassa
             var room = await _context.MeetingRooms.FindAsync(dto.MeetingRoomId) ?? throw new NotFoundException($"Kokoushuonetta ID:llä {dto.MeetingRoomId} ei löydy.");

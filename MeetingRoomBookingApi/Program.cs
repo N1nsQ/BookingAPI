@@ -2,11 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using MeetingRoomBookingApi.Data;
 using MeetingRoomBookingApi.Services;
 using MeetingRoomBookingApi.Middleware;
+using MeetingRoomBookingApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+builder.Services.Configure<BookingSettings>(
+    builder.Configuration.GetSection("BookingSettings"));
 
 // Lis‰‰ Entity Framework Core InMemory database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
