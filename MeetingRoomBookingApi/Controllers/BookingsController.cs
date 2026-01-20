@@ -19,7 +19,7 @@ namespace MeetingRoomBookingApi.Controllers
 
         // POST: api/Bookings
         [HttpPost]
-        public async Task<ActionResult<BookingDto>> CreateBooking(CreateBookingDto dto)
+        public async Task<ActionResult<BookingDto>> CreateBooking([FromBody] CreateBookingDto dto)
         {
             var booking = await _bookingService.CreateBookingAsync(dto);
             return CreatedAtAction(nameof(GetBooking), new { id = booking.Id }, booking);
