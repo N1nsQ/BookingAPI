@@ -90,7 +90,7 @@ namespace MeetingRoomBookingApi.Services
                 BookedBy = dto.BookedBy,
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
-                Description = dto.Description
+                AdditionalDetails = dto.AdditionalDetails
             };
 
             _context.Bookings.Add(booking);
@@ -104,7 +104,7 @@ namespace MeetingRoomBookingApi.Services
                 BookedBy = booking.BookedBy,
                 StartTime = booking.StartTime,
                 EndTime = booking.EndTime,
-                Description = booking.Description
+                AdditionalDetails = booking.AdditionalDetails
             };
 
             return resultDto;
@@ -124,7 +124,7 @@ namespace MeetingRoomBookingApi.Services
                 BookedBy = booking.BookedBy,
                 StartTime = booking.StartTime,
                 EndTime = booking.EndTime,
-                Description = booking.Description
+                AdditionalDetails = booking.AdditionalDetails
             };
 
             return dto;
@@ -145,7 +145,7 @@ namespace MeetingRoomBookingApi.Services
                     BookedBy = b.BookedBy,
                     StartTime = b.StartTime,
                     EndTime = b.EndTime,
-                    Description = b.Description
+                    AdditionalDetails = b.AdditionalDetails
                 })
                 .OrderBy(b => b.StartTime)
                 .ToListAsync();
@@ -164,7 +164,7 @@ namespace MeetingRoomBookingApi.Services
                     BookedBy = b.BookedBy,
                     StartTime = b.StartTime,
                     EndTime = b.EndTime,
-                    Description = b.Description
+                    AdditionalDetails = b.AdditionalDetails
                 })
                 .OrderBy(b => b.StartTime)
                 .ToListAsync();
