@@ -63,7 +63,7 @@ namespace MeetingRoomBookingApi.Middleware
                     details: validationEx.ErrorDetails
                 ),
 
-                BookingNotFoundException notFoundEx => new ErrorResponseDto(
+                NotFoundException notFoundEx => new ErrorResponseDto(
                     statusCode: (int)HttpStatusCode.NotFound,
                     message: notFoundEx.Message,
                     traceId: traceId
