@@ -22,11 +22,11 @@ namespace MeetingRoomBookingApi.Services
 
         public async Task<BookingDto> CreateBookingAsync(CreateBookingDto dto)
         {
-            var bookingDuration = dto.EndTime - dto.StartTime;
-
             // Validoi: Aloitusajan täytyy olla ennen lopetusaikaa
             if (dto.StartTime >= dto.EndTime)
                 throw new BookingValidationException("Aloitusajan on oltava ennen lopetusaikaa");
+
+            var bookingDuration = dto.EndTime - dto.StartTime;
 
             // Validoi: Varaukset eivät voi sijoittua menneisyyteen
             if (dto.StartTime < _time.Now)
