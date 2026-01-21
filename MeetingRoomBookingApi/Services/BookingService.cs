@@ -23,24 +23,69 @@ namespace MeetingRoomBookingApi.Services
         public async Task<BookingDto> CreateBookingAsync(CreateBookingDto dto)
         {
             // Validoi: Aloitusajan täytyy olla ennen lopetusaikaa
+            ValidateTimeRange(dto);
+
+            // Validoi: Varaukset eivät voi sijoittua menneisyyteen
+            ValidateNotInPast(dto);
+
+
+            // Validoi: Varauksen minimipituus
+            // Validoi: Varauksen maximipituus
+            ValidateBookingDuration(dto);
+
+
+            // Validoi: Varaus max 6kk päähän nykyhetkestä
+            ValidateMaxBookingDate(dto);
+
+            // Tarkista että huone on olemassa
+            var room = await GetMeetingRoomOrThrowAsync(dto.MeetingRoomId);
+
+
+            // Tarkista päällekkäisyydet
+            await EnsureNoConflictsAsync(dto);
+
+            // Luo varaus
+            var booking = CreateBookingEntity(dto);
+
+            // Tallenna varaus
+            await SaveBookingAsync(booking);
+
+            return MapToDto(booking, room);
+        }
+
+        // Validoi: Aloitusaika ennen lopetusaikaa
+        private static void ValidateTimeRange(CreateBookingDto dto)
+        {
             if (dto.StartTime >= dto.EndTime)
-                throw new BookingValidationException("Aloitusajan on oltava ennen lopetusaikaa",
+                throw new BookingValidationException(
+                    "Aloitusajan on oltava ennen lopetusaikaa",
                     "BOOKING_INVALID_TIME_RANGE",
                     new
                     {
                         requestedStart = dto.StartTime,
                         requestedEnd = dto.EndTime
                     });
+        }
 
+        // Validoi: Varaus ei voi sijoittua menneisyyteen
+        private void ValidateNotInPast(CreateBookingDto dto)
+        {
+            if (dto.StartTime < _time.Now)
+                throw new BookingValidationException(
+                    "Varaus ei voi sijoittua menneisyyteen.",
+                    "BOOKING_IN_THE_PAST",
+                    new
+                    {
+                        requestedStart = dto.StartTime,
+                        currentTime = _time.Now
+                    });
+        }
+
+        // Validoi varauksen maksimi- ja minimipituudet
+        private void ValidateBookingDuration(CreateBookingDto dto)
+        {
             var bookingDuration = dto.EndTime - dto.StartTime;
 
-            // Validoi: Varaukset eivät voi sijoittua menneisyyteen
-            if (dto.StartTime < _time.Now)
-                throw new BookingValidationException("Varaus ei voi sijoittua menneisyyteen.",
-                    "BOOKING_IN_THE_PAST");
-
-
-            // Validoi: Varauksen minimipituus
             if (bookingDuration.TotalMinutes < _settings.MinBookingMinutes)
                 throw new BookingValidationException(
                     $"Varauksen minimipituus on {_settings.MinBookingMinutes} minuuttia.",
@@ -48,10 +93,9 @@ namespace MeetingRoomBookingApi.Services
                     new
                     {
                         requestedMinutes = bookingDuration.TotalMinutes,
-                        minimumMinutes = _settings.MinBookingMinutes  
+                        minimumMinutes = _settings.MinBookingMinutes
                     });
 
-            // Validoi: Varauksen maximipituus
             if (bookingDuration.TotalHours > _settings.MaxBookingHours)
                 throw new BookingValidationException(
                     $"Varauksen maximipituus on {_settings.MaxBookingHours} tuntia.",
@@ -59,79 +103,79 @@ namespace MeetingRoomBookingApi.Services
                     new
                     {
                         requestedHours = bookingDuration.TotalHours,
-                        maxHours = $"{ _settings.MaxBookingHours } hours"  
+                        maxHours = _settings.MaxBookingHours
                     });
+        }
 
-
-            // Validoi: Varaus max 6kk päähän nykyhetkestä
-
+        // Validoi: Varaus max 6kk päähän nykyhetkestä
+        private void ValidateMaxBookingDate(CreateBookingDto dto)
+        {
             var today = DateOnly.FromDateTime(_time.Now);
-            var maxBookingDate = today.AddMonths(_settings.MaxBookingMonthsAhead);
+            var maxDate = today.AddMonths(_settings.MaxBookingMonthsAhead);
             var requestedDate = DateOnly.FromDateTime(dto.StartTime);
 
-            if (requestedDate > maxBookingDate)
-                throw new BookingValidationException($"Voit tehdä varauksen enintään {_settings.MaxBookingMonthsAhead} kuukauden päähän nykyhetkestä.",
+            if (requestedDate > maxDate)
+                throw new BookingValidationException(
+                    $"Voit tehdä varauksen enintään {_settings.MaxBookingMonthsAhead} kuukauden päähän nykyhetkestä.",
                     "BOOKING_TOO_FAR_IN_FUTURE",
                     new
                     {
-                        requestedStartDate = dto.StartTime,
-                        maximumStartDate = maxBookingDate,
-                        maximumMonthsAhead = _settings.MaxBookingMonthsAhead
+                        requestedStartDate = requestedDate,
+                        maximumStartDate = maxDate
                     });
+        }
 
-            // Tarkista että huone on olemassa
-            var room = await _context.MeetingRooms.FindAsync(dto.MeetingRoomId) ?? throw new NotFoundException($"Kokoushuonetta ID:llä {dto.MeetingRoomId} ei löydy.");
+        private async Task<MeetingRoom> GetMeetingRoomOrThrowAsync(int roomId)
+        {
+            return await _context.MeetingRooms.FindAsync(roomId)
+                ?? throw new NotFoundException($"Kokoushuonetta ID:llä {roomId} ei löydy.");
+        }
 
+        private async Task EnsureNoConflictsAsync(CreateBookingDto dto)
+        {
+            var conflict = await _context.Bookings
+                .FirstOrDefaultAsync(b =>
+                    b.MeetingRoomId == dto.MeetingRoomId &&
+                    dto.StartTime < b.EndTime &&
+                    dto.EndTime > b.StartTime);
 
-            // Tarkista päällekkäisyydet
-            var conflictingBooking = await _context.Bookings
-                .FirstOrDefaultAsync(b => b.MeetingRoomId == dto.MeetingRoomId && 
-                dto.StartTime < b.EndTime && 
-                dto.EndTime > b.StartTime);
-
-            if (conflictingBooking != null)
-            {
+            if (conflict != null)
                 throw new BookingConflictException(
                     "Huone on jo varattu kyseiselle ajanjaksolle.",
                     "BOOKING_TIME_CONFLICT",
                     new
                     {
-                        conflictingBooking = new
-                        {
-                            startTime = conflictingBooking.StartTime,
-                            endTime = conflictingBooking.EndTime,
-                            bookedBy = conflictingBooking.BookedBy
-                        }
-                    }
-                );
-            }
+                        startTime = conflict.StartTime,
+                        endTime = conflict.EndTime,
+                        bookedBy = conflict.BookedBy
+                    });
+        }
 
-            // Luo varaus
-            var booking = new Booking
-            {
-                MeetingRoomId = dto.MeetingRoomId,
-                BookedBy = dto.BookedBy,
-                StartTime = dto.StartTime,
-                EndTime = dto.EndTime,
-                AdditionalDetails = dto.AdditionalDetails
-            };
+        private static Booking CreateBookingEntity(CreateBookingDto dto) => new()
+        {
+            MeetingRoomId = dto.MeetingRoomId,
+            BookedBy = dto.BookedBy,
+            StartTime = dto.StartTime,
+            EndTime = dto.EndTime,
+            AdditionalDetails = dto.AdditionalDetails
+        };
 
+        private async Task SaveBookingAsync(Booking booking)
+        {
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
-
-            var resultDto = new BookingDto
-            {
-                Id = booking.Id,
-                MeetingRoomId = booking.MeetingRoomId,
-                MeetingRoomName = room.Name,
-                BookedBy = booking.BookedBy,
-                StartTime = booking.StartTime,
-                EndTime = booking.EndTime,
-                AdditionalDetails = booking.AdditionalDetails
-            };
-
-            return resultDto;
         }
+
+        private static BookingDto MapToDto(Booking booking, MeetingRoom room) => new()
+        {
+            Id = booking.Id,
+            MeetingRoomId = booking.MeetingRoomId,
+            MeetingRoomName = room.Name,
+            BookedBy = booking.BookedBy,
+            StartTime = booking.StartTime,
+            EndTime = booking.EndTime,
+            AdditionalDetails = booking.AdditionalDetails
+        };
 
         public async Task<BookingDto> GetBookingAsync(int id)
         {
