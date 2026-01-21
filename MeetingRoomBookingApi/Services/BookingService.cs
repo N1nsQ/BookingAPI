@@ -24,13 +24,25 @@ namespace MeetingRoomBookingApi.Services
         {
             // Validoi: Aloitusajan täytyy olla ennen lopetusaikaa
             if (dto.StartTime >= dto.EndTime)
-                throw new BookingValidationException("Aloitusajan on oltava ennen lopetusaikaa");
+                throw new BookingValidationException("Aloitusajan on oltava ennen lopetusaikaa",
+                    new
+                    {
+                        code = "BOOKING_INVALID_TIME_RANGE",
+                        requestedStart = dto.StartTime,
+                        requestedEnd = dto.EndTime
+                    });
 
             var bookingDuration = dto.EndTime - dto.StartTime;
 
             // Validoi: Varaukset eivät voi sijoittua menneisyyteen
             if (dto.StartTime < _time.Now)
-                throw new BookingValidationException("Varaus ei voi sijoittua menneisyyteen.");
+                throw new BookingValidationException("Varaus ei voi sijoittua menneisyyteen.",
+                    new
+                    {
+                        code = "BOOKING_IN_THE_PAST",
+                        requestedStartDatw = dto.StartTime,
+                        today = _time.Now
+                    });
 
 
             // Validoi: Varauksen minimipituus
@@ -39,9 +51,9 @@ namespace MeetingRoomBookingApi.Services
                     $"Varauksen minimipituus on {_settings.MinBookingMinutes} minuuttia.",
                     new
                     {
-                        errorMessage = "Booking too short",
-                        currentDuration = bookingDuration.TotalMinutes,
-                        minimumDuration = _settings.MinBookingMinutes  
+                        code = "BOOKING_TOO_SHORT",
+                        requestedMinutes = bookingDuration.TotalMinutes,
+                        minimumMinutes = _settings.MinBookingMinutes  
                     });
 
             // Validoi: Varauksen maximipituus
@@ -50,15 +62,23 @@ namespace MeetingRoomBookingApi.Services
                     $"Varauksen maximipituus on {_settings.MaxBookingHours} tuntia.",
                     new
                     {
-                        errorMessage = "Booking too long",
+                        code = "BOOKING_TOO_LONG",
                         currentDurationFormatted = $"{(int)bookingDuration.TotalDays} days, {bookingDuration.Hours} hours, {bookingDuration.Minutes} minutes",
-                        maxHours = _settings.MaxBookingHours  
+                        maxHours = $"{ _settings.MaxBookingHours } hours"  
                     });
 
             // Validoi: Varaus max 6kk päähän nykyhetkestä
             var maxBookingDate = _time.Now.AddMonths(_settings.MaxBookingMonthsAhead);
             if (dto.StartTime > maxBookingDate)
-                throw new BookingValidationException($"Voit tehdä varauksen enintään {_settings.MaxBookingMonthsAhead} kuukauden päähän nykyhetkestä.");
+                throw new BookingValidationException($"Voit tehdä varauksen enintään {_settings.MaxBookingMonthsAhead} kuukauden päähän nykyhetkestä.",
+                    new
+                    {
+                        code = "BOOKING_TOO_FAR_IN_FUTURE",
+                        requestedStartDate = dto.StartTime,
+                        currentDate = _time.Now,
+                        maximumStartDate = _time.Now.AddMonths(_settings.MaxBookingMonthsAhead),
+                        maximumMonthsAhead = _settings.MaxBookingMonthsAhead
+                    });
 
             // Tarkista että huone on olemassa
             var room = await _context.MeetingRooms.FindAsync(dto.MeetingRoomId) ?? throw new NotFoundException($"Kokoushuonetta ID:llä {dto.MeetingRoomId} ei löydy.");
@@ -76,6 +96,7 @@ namespace MeetingRoomBookingApi.Services
                     "Huone on jo varattu kyseiselle ajanjaksolle.",
                     new
                     {
+                        code = "BOOKING_TIME_CONFLICT",
                         startTime = conflictingBooking.StartTime,
                         endTime = conflictingBooking.EndTime,
                         bookedBy = conflictingBooking.BookedBy
