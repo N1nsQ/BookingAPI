@@ -10,8 +10,10 @@
         {
         }
 
-        public BookingValidationException(string message, object errorDetails)
-            : base(message, errorDetails)
+        public BookingValidationException(string message, string errorCode) : base(message, errorCode) { }
+
+        public BookingValidationException(string message, string errorCode, object errorDetails)
+            : base(message, errorCode, errorDetails)
         {
         }
     }

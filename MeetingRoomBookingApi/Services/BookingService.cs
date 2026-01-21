@@ -25,9 +25,9 @@ namespace MeetingRoomBookingApi.Services
             // Validoi: Aloitusajan täytyy olla ennen lopetusaikaa
             if (dto.StartTime >= dto.EndTime)
                 throw new BookingValidationException("Aloitusajan on oltava ennen lopetusaikaa",
+                    "BOOKING_INVALID_TIME_RANGE",
                     new
                     {
-                        code = "BOOKING_INVALID_TIME_RANGE",
                         requestedStart = dto.StartTime,
                         requestedEnd = dto.EndTime
                     });
@@ -37,21 +37,16 @@ namespace MeetingRoomBookingApi.Services
             // Validoi: Varaukset eivät voi sijoittua menneisyyteen
             if (dto.StartTime < _time.Now)
                 throw new BookingValidationException("Varaus ei voi sijoittua menneisyyteen.",
-                    new
-                    {
-                        code = "BOOKING_IN_THE_PAST",
-                        requestedStartDate = dto.StartTime,
-                        today = _time.Now
-                    });
+                    "BOOKING_INVALID_TIME_RANGE");
 
 
             // Validoi: Varauksen minimipituus
             if (bookingDuration.TotalMinutes < _settings.MinBookingMinutes)
                 throw new BookingValidationException(
                     $"Varauksen minimipituus on {_settings.MinBookingMinutes} minuuttia.",
+                    "BOOKING_TOO_SHORT",
                     new
                     {
-                        code = "BOOKING_TOO_SHORT",
                         requestedMinutes = bookingDuration.TotalMinutes,
                         minimumMinutes = _settings.MinBookingMinutes  
                     });
@@ -60,10 +55,10 @@ namespace MeetingRoomBookingApi.Services
             if (bookingDuration.TotalHours > _settings.MaxBookingHours)
                 throw new BookingValidationException(
                     $"Varauksen maximipituus on {_settings.MaxBookingHours} tuntia.",
+                    "BOOKING_TOO_LONG",
                     new
                     {
-                        code = "BOOKING_TOO_LONG",
-                        currentDurationFormatted = $"{(int)bookingDuration.TotalDays} days, {bookingDuration.Hours} hours, {bookingDuration.Minutes} minutes",
+                        requestedHours = bookingDuration.TotalHours,
                         maxHours = $"{ _settings.MaxBookingHours } hours"  
                     });
 
@@ -71,11 +66,10 @@ namespace MeetingRoomBookingApi.Services
             var maxBookingDate = _time.Now.AddMonths(_settings.MaxBookingMonthsAhead);
             if (dto.StartTime > maxBookingDate)
                 throw new BookingValidationException($"Voit tehdä varauksen enintään {_settings.MaxBookingMonthsAhead} kuukauden päähän nykyhetkestä.",
+                    "BOOKING_TOO_FAR_IN_FUTURE",
                     new
                     {
-                        code = "BOOKING_TOO_FAR_IN_FUTURE",
                         requestedStartDate = dto.StartTime,
-                        currentDate = _time.Now,
                         maximumStartDate = _time.Now.AddMonths(_settings.MaxBookingMonthsAhead),
                         maximumMonthsAhead = _settings.MaxBookingMonthsAhead
                     });
@@ -94,12 +88,15 @@ namespace MeetingRoomBookingApi.Services
             {
                 throw new BookingConflictException(
                     "Huone on jo varattu kyseiselle ajanjaksolle.",
+                    "BOOKING_TIME_CONFLICT",
                     new
                     {
-                        code = "BOOKING_TIME_CONFLICT",
-                        startTime = conflictingBooking.StartTime,
-                        endTime = conflictingBooking.EndTime,
-                        bookedBy = conflictingBooking.BookedBy
+                        conflictingBooking = new
+                        {
+                            startTime = conflictingBooking.StartTime,
+                            endTime = conflictingBooking.EndTime,
+                            bookedBy = conflictingBooking.BookedBy
+                        }
                     }
                 );
             }

@@ -11,8 +11,8 @@
         {
         }
 
-        public BookingConflictException(string message, object errorDetails)
-            : base(message, errorDetails)
+        public BookingConflictException(string message, string errorCode, object errorDetails)
+            : base(message, errorCode, errorDetails)
         {
         }
     }

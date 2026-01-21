@@ -2,6 +2,7 @@
 using MeetingRoomBookingApi.Exceptions;
 using System.Net;
 using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Model;
 
 
 namespace MeetingRoomBookingApi.Middleware
@@ -59,6 +60,7 @@ namespace MeetingRoomBookingApi.Middleware
                 BookingValidationException validationEx => new ErrorResponseDto(
                     statusCode: (int)HttpStatusCode.BadRequest,
                     message: validationEx.Message,
+                    errorCode: validationEx.ErrorCode ?? "VALIDATION_ERROR",
                     traceId: traceId,
                     details: validationEx.ErrorDetails
                 ),
@@ -66,12 +68,14 @@ namespace MeetingRoomBookingApi.Middleware
                 NotFoundException notFoundEx => new ErrorResponseDto(
                     statusCode: (int)HttpStatusCode.NotFound,
                     message: notFoundEx.Message,
+                    errorCode: "RESOURCE_NOT_FOUND",
                     traceId: traceId
                 ),
 
                 BookingConflictException conflictEx => new ErrorResponseDto(
                     statusCode: (int)HttpStatusCode.Conflict,
                     message: conflictEx.Message,
+                    errorCode: conflictEx.ErrorCode ?? "BOOKING_CONFLICT",
                     traceId: traceId,
                     details: conflictEx.ErrorDetails
                 ),
@@ -80,6 +84,7 @@ namespace MeetingRoomBookingApi.Middleware
                 _ => new ErrorResponseDto(
                     statusCode: (int)HttpStatusCode.InternalServerError,
                     message: "Palvelimella tapahtui virhe. Yritä myöhemmin uudelleen.",
+                    errorCode: "INTERNAL_ERROR",
                     traceId: traceId
                 )
             };
