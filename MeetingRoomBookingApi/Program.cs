@@ -3,7 +3,6 @@ using MeetingRoomBookingApi.Data;
 using MeetingRoomBookingApi.Services;
 using MeetingRoomBookingApi.Middleware;
 using MeetingRoomBookingApi.Models;
-using MeetingRoomBookingApi;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -2,7 +2,6 @@
 using MeetingRoomBookingApi.Exceptions;
 using System.Net;
 using System.Text.Json;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Model;
 
 
 namespace MeetingRoomBookingApi.Middleware
