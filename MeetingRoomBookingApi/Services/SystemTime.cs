@@ -1,6 +1,4 @@
-﻿using MeetingRoomBookingApi.Services;
-
-namespace MeetingRoomBookingApi
+﻿namespace MeetingRoomBookingApi.Services
 {
     public class SystemTime : ISystemTime
     {
