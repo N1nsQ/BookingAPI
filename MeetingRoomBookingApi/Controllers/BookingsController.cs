@@ -17,6 +17,10 @@ namespace MeetingRoomBookingApi.Controllers
 
         // POST: api/Bookings
         [HttpPost]
+        [ProducesResponseType(typeof(BookingDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BookingDto>> CreateBooking([FromBody] CreateBookingDto dto)
         {
             var booking = await _bookingService.CreateBookingAsync(dto);
@@ -25,6 +29,8 @@ namespace MeetingRoomBookingApi.Controllers
 
         // GET: api/Bookings/5
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(BookingDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BookingDto>> GetBooking(int id)
         {
             var booking = await _bookingService.GetBookingAsync(id);
@@ -33,6 +39,8 @@ namespace MeetingRoomBookingApi.Controllers
 
         // GET: api/Bookings/room/1
         [HttpGet("room/{roomId}")]
+        [ProducesResponseType(typeof(IEnumerable<BookingDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetRoomBookings(int roomId)
         {
             var bookings = await _bookingService.GetRoomBookingsAsync(roomId);
@@ -41,6 +49,8 @@ namespace MeetingRoomBookingApi.Controllers
 
         // DELETE: api/Bookings/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteBooking(int id)
         {
             await _bookingService.DeleteBookingAsync(id);
@@ -49,6 +59,7 @@ namespace MeetingRoomBookingApi.Controllers
 
         // GET: api/Bookings
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<BookingDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetAllBookings()
         {
             var bookings = await _bookingService.GetAllBookingsAsync();
