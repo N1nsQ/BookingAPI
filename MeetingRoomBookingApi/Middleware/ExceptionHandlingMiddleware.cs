@@ -31,17 +31,13 @@ namespace MeetingRoomBookingApi.Middleware
 
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            // Luo error response ja määritä status code
             var errorResponse = CreateErrorResponse(context, exception);
 
-            // Logita virhe
             LogException(exception, errorResponse.StatusCode);
 
-            // Aseta response
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = errorResponse.StatusCode;
 
-            // Serialisoi ja palauta
             var jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -79,7 +75,6 @@ namespace MeetingRoomBookingApi.Middleware
                     details: conflictEx.ErrorDetails
                 ),
 
-                // Kaikki muut virheet -> 500 Internal Server Error
                 _ => new ErrorResponseDto(
                     statusCode: (int)HttpStatusCode.InternalServerError,
                     message: "Palvelimella tapahtui virhe. Yritä myöhemmin uudelleen.",
@@ -91,20 +86,16 @@ namespace MeetingRoomBookingApi.Middleware
 
         private void LogException(Exception exception, int statusCode)
         {
-            // Logita eri tasolla riippuen virhetyypistä
             if (statusCode >= 500)
             {
-                // Palvelinvirheet ovat vakavia
                 _logger.LogError(exception, "Palvelinvirhe: {Message}", exception.Message);
             }
             else if (statusCode == 404)
             {
-                // Not Found ei ole niin vakava
                 _logger.LogWarning("Resurssia ei löytynyt: {Message}", exception.Message);
             }
             else
             {
-                // Validointi- ja konflikttivirheet ovat informatiivisia
                 _logger.LogInformation("Asiakasvirhe ({StatusCode}): {Message}", statusCode, exception.Message);
             }
         }

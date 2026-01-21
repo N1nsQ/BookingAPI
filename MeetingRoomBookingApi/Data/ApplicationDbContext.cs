@@ -17,7 +17,6 @@ namespace MeetingRoomBookingApi.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Seed-data: Lisää muutama kokoushuone
             modelBuilder.Entity<MeetingRoom>().HasData(
                 new MeetingRoom { Id = 1, Name = "Sali A" },
                 new MeetingRoom { Id = 2, Name = "Sali B" },

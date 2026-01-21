@@ -15,7 +15,6 @@ namespace MeetingRoomBookingApi.Controllers
             _bookingService = bookingService;
         }
 
-        // POST: api/Bookings
         [HttpPost]
         [ProducesResponseType(typeof(BookingDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
@@ -27,7 +26,6 @@ namespace MeetingRoomBookingApi.Controllers
             return CreatedAtAction(nameof(GetBooking), new { id = booking.Id }, booking);
         }
 
-        // GET: api/Bookings/5
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(BookingDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
@@ -37,7 +35,6 @@ namespace MeetingRoomBookingApi.Controllers
             return booking;
         }
 
-        // GET: api/Bookings/room/1
         [HttpGet("room/{roomId}")]
         [ProducesResponseType(typeof(IEnumerable<BookingDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
@@ -47,7 +44,6 @@ namespace MeetingRoomBookingApi.Controllers
             return Ok(bookings);
         }
 
-        // DELETE: api/Bookings/5
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
@@ -57,7 +53,6 @@ namespace MeetingRoomBookingApi.Controllers
             return NoContent();
         }
 
-        // GET: api/Bookings
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<BookingDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetAllBookings()

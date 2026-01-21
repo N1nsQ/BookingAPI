@@ -22,38 +22,22 @@ namespace MeetingRoomBookingApi.Services
 
         public async Task<BookingDto> CreateBookingAsync(CreateBookingDto dto)
         {
-            // Validoi: Aloitusajan täytyy olla ennen lopetusaikaa
             ValidateTimeRange(dto);
-
-            // Validoi: Varaukset eivät voi sijoittua menneisyyteen
             ValidateNotInPast(dto);
-
-
-            // Validoi: Varauksen minimipituus
-            // Validoi: Varauksen maximipituus
             ValidateBookingDuration(dto);
-
-
-            // Validoi: Varaus max 6kk päähän nykyhetkestä
             ValidateMaxBookingDate(dto);
 
-            // Tarkista että huone on olemassa
             var room = await GetMeetingRoomOrThrowAsync(dto.MeetingRoomId);
 
-
-            // Tarkista päällekkäisyydet
             await EnsureNoConflictsAsync(dto);
 
-            // Luo varaus
             var booking = CreateBookingEntity(dto);
 
-            // Tallenna varaus
             await SaveBookingAsync(booking);
 
             return MapToDto(booking, room);
         }
 
-        // Validoi: Aloitusaika ennen lopetusaikaa
         private static void ValidateTimeRange(CreateBookingDto dto)
         {
             if (dto.StartTime >= dto.EndTime)
@@ -67,7 +51,6 @@ namespace MeetingRoomBookingApi.Services
                     });
         }
 
-        // Validoi: Varaus ei voi sijoittua menneisyyteen
         private void ValidateNotInPast(CreateBookingDto dto)
         {
             if (dto.StartTime < _time.Now)
@@ -81,7 +64,6 @@ namespace MeetingRoomBookingApi.Services
                     });
         }
 
-        // Validoi varauksen maksimi- ja minimipituudet
         private void ValidateBookingDuration(CreateBookingDto dto)
         {
             var bookingDuration = dto.EndTime - dto.StartTime;
@@ -107,7 +89,6 @@ namespace MeetingRoomBookingApi.Services
                     });
         }
 
-        // Validoi: Varaus max 6kk päähän nykyhetkestä
         private void ValidateMaxBookingDate(CreateBookingDto dto)
         {
             var today = DateOnly.FromDateTime(_time.Now);
