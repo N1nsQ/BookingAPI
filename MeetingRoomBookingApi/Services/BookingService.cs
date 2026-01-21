@@ -40,7 +40,7 @@ namespace MeetingRoomBookingApi.Services
                     new
                     {
                         code = "BOOKING_IN_THE_PAST",
-                        requestedStartDatw = dto.StartTime,
+                        requestedStartDate = dto.StartTime,
                         today = _time.Now
                     });
 
