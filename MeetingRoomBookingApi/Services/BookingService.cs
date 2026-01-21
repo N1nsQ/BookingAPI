@@ -62,15 +62,20 @@ namespace MeetingRoomBookingApi.Services
                         maxHours = $"{ _settings.MaxBookingHours } hours"  
                     });
 
+
             // Validoi: Varaus max 6kk päähän nykyhetkestä
-            var maxBookingDate = _time.Now.AddMonths(_settings.MaxBookingMonthsAhead);
-            if (dto.StartTime > maxBookingDate)
+
+            var today = DateOnly.FromDateTime(_time.Now);
+            var maxBookingDate = today.AddMonths(_settings.MaxBookingMonthsAhead);
+            var requestedDate = DateOnly.FromDateTime(dto.StartTime);
+
+            if (requestedDate > maxBookingDate)
                 throw new BookingValidationException($"Voit tehdä varauksen enintään {_settings.MaxBookingMonthsAhead} kuukauden päähän nykyhetkestä.",
                     "BOOKING_TOO_FAR_IN_FUTURE",
                     new
                     {
                         requestedStartDate = dto.StartTime,
-                        maximumStartDate = _time.Now.AddMonths(_settings.MaxBookingMonthsAhead),
+                        maximumStartDate = maxBookingDate,
                         maximumMonthsAhead = _settings.MaxBookingMonthsAhead
                     });
 
