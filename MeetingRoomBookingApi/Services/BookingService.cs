@@ -37,7 +37,7 @@ namespace MeetingRoomBookingApi.Services
             // Validoi: Varaukset eivät voi sijoittua menneisyyteen
             if (dto.StartTime < _time.Now)
                 throw new BookingValidationException("Varaus ei voi sijoittua menneisyyteen.",
-                    "BOOKING_INVALID_TIME_RANGE");
+                    "BOOKING_IN_THE_PAST");
 
 
             // Validoi: Varauksen minimipituus
