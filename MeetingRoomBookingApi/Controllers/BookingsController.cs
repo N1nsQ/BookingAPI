@@ -15,8 +15,6 @@ namespace MeetingRoomBookingApi.Controllers
             _bookingService = bookingService;
         }
 
-        private const int MinBookingMinutes = 15;
-
         // POST: api/Bookings
         [HttpPost]
         public async Task<ActionResult<BookingDto>> CreateBooking([FromBody] CreateBookingDto dto)
