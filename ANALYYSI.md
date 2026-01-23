@@ -10,7 +10,7 @@ Testaillessani APIa en löytänyt bugeja, ja virheviestit olivat myös järkevä
 
 Myöhemmin käytin tekoälyä paljon koodin selittämiseen, ja se selitti logiikkaa ja työsttevää asiaa paljon myös pyytämättä jokaisen kehotteen yhdeydessä. Pyysin tekoälyä perustelemaan tekemiään ratkaisuja, ja sain järkeviä vastauksia. Esimerkiksi, kun pyysin tekoälyä selittämään BadRequest ja Conflict -tyyppien eroja, niin se selitti asian hyvin ymmärrettävästi ja selkein esimerkein.
 
-(Suhtaudun tekoälyn antamiin vastauksiin/tutorointiin aina kuitenkin pienellä skeptisyydellä, ja mikäli minulla ei ole asiasta muuta tietoa, varmistan tekoälyn antamatat vastaukset dokumentaatiosta tai muista luotettavista lähteistä.)
+(Suhtaudun tekoälyn antamiin vastauksiin/tutorointiin aina kuitenkin pienellä kriittisyydellä, ja mikäli minulla ei ole asiasta muuta tietoa, varmistan tekoälyn antamatat vastaukset dokumentaatiosta tai muista luotettavista lähteistä.)
 
 ## 2. Mitä tekoäly teki huonosti?
 
