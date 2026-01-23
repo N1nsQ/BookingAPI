@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeetingRoomBookingApi", "MeetingRoomBookingApi\MeetingRoomBookingApi.csproj", "{A10F45FC-D14F-453D-BFB3-C6737522E6DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeetingRoomBookingApi", "MeetingRoomBookingApi\MeetingRoomBookingApi.csproj", "{A10F45FC-D14F-453D-BFB3-C6737522E6DC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeetingRoomBookingApiTests", "MeetingRoomBookingApiTests\MeetingRoomBookingApiTests\MeetingRoomBookingApiTests.csproj", "{5C4681EF-4339-41DE-AE17-1ECF016597CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{A10F45FC-D14F-453D-BFB3-C6737522E6DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A10F45FC-D14F-453D-BFB3-C6737522E6DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A10F45FC-D14F-453D-BFB3-C6737522E6DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C4681EF-4339-41DE-AE17-1ECF016597CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C4681EF-4339-41DE-AE17-1ECF016597CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C4681EF-4339-41DE-AE17-1ECF016597CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C4681EF-4339-41DE-AE17-1ECF016597CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
