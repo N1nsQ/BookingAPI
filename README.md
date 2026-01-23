@@ -41,7 +41,7 @@ API käyttää InMemory -tietokantaa, eli tiedot ovat olemassa istunnon ajan. Ku
 
 - **GET /api/Bookings**
   - Hae kaikki varaukset kaikista huoneista
-  - Jos varauksia ei ole, palautetaan tyhjä lista `[]
+  - Jos varauksia ei ole, palautetaan tyhjä lista `[]`
 - **GET /api/Bookings/{id}**
   - Hae yhtä varausta id:llä
   - Jos id:llä ei löydy mitään, palautetaan 404 virheviesti
@@ -58,11 +58,24 @@ API käyttää InMemory -tietokantaa, eli tiedot ovat olemassa istunnon ajan. Ku
 
 API palauttaa virhetilanteissa yhtenäisen virherakenteen:
 
-- `message` – käyttäjälle tarkoitettu virheviesti
-- `statusCode` – HTTP-statuskoodi
-- `traceId` – pyyntöön liittyvä tunniste
-- `timestamp` – virheen ajankohta
-- `code` – frontendille tarkoitettu virhekoodi (esim. `BOOKING_TOO_SHORT`)
+- `Message` – käyttäjälle tarkoitettu virheviesti
+- `StatusCode` – HTTP-statuskoodi
+- `ErrorCode` – frontendille tarkoitettu virhekoodi (esim. `BOOKING_TOO_SHORT`)
+- `TraceId` – pyyntöön liittyvä tunniste
+- `Details` – lisätietoja, esim. päälleekäisen varauksen tiedot
+- `Timestamp` – virheen ajankohta
+
+**ErrorHandlingMiddleware**
+
+- `BookingConflictException` – palautetaan, kun asiakas tekee validin pyynnön, mutta se ei onnistu sisäisen konfliktin takia
+  - Esimerkki: Käyttäjä yrittää tehdä varausta, mutta huone on varattu
+  - Kääntyy HTTP 409 Conflict -vastaukseksi
+- `BookingValidationException` – palautetaan, kun asiakkaan lähettämä pyyntö ei vastaa validointisääntöjä
+  - Esimerkki: Varauksen lopetusaika on ennen aloitusaikaa
+  - Kääntyy HTTP 400 Bad Request -vastaukseksi.
+- `NotFoundException` - palautetaan, kun pyydettyä resurssia ei löydy
+  - Esimerkki: Kokoushuonetta ei löydy, ID:tä ei löydy
+  - Kääntyy HTTP 404 Not Found -vastaukseksi.
 
 ### Esimerkki JSON
 
